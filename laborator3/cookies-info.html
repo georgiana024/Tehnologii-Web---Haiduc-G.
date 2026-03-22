@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laborator 3 - Informații Cookies & Storage</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light">
+
+    <nav>
+        <a href="index.html">Acasă</a> | 
+        <a href="preferences.html">Setări Preferințe</a> | 
+        <a href="cookies-info.html">Vizualizare Cookies</a> | 
+        <a href="login.html">Autentificare</a>
+    </nav>
+
+    <div class="container">
+        <h1>Informații Cookies și Storage</h1>
+
+        <section>
+            <h2>1. Cookies</h2>
+            <p><strong>Valoare brută (document.cookie):</strong> <span id="rawCookies" style="word-break: break-all; font-family: monospace;"></span></p>
+            <table border="1" width="100%">
+                <thead>
+                    <tr>
+                        <th>Nume</th>
+                        <th>Valoare</th>
+                        <th>Lungime (caractere)</th>
+                        <th>Acțiune</th>
+                    </tr>
+                </thead>
+                <tbody id="cookiesTbody"></tbody>
+            </table>
+        </section>
+
+        <hr>
+
+        <section>
+            <h2>2. Local Storage</h2>
+            <p><strong>JSON formatat:</strong></p>
+            <pre id="localJson" style="background: #eee; padding: 10px; border-radius: 5px; color: #333;"></pre>
+            <table border="1" width="100%">
+                <thead>
+                    <tr>
+                        <th>Cheie</th>
+                        <th>Valoare</th>
+                        <th>Dimensiune (caractere)</th>
+                        <th>Acțiune</th>
+                    </tr>
+                </thead>
+                <tbody id="localTbody"></tbody>
+            </table>
+        </section>
+
+        <hr>
+
+        <section>
+            <h2>3. Session Storage</h2>
+            <p><strong>JSON formatat:</strong></p>
+            <pre id="sessionJson" style="background: #eee; padding: 10px; border-radius: 5px; color: #333;"></pre>
+            <table border="1" width="100%">
+                <thead>
+                    <tr>
+                        <th>Cheie</th>
+                        <th>Valoare</th>
+                        <th>Dimensiune (caractere)</th>
+                        <th>Acțiune</th>
+                    </tr>
+                </thead>
+                <tbody id="sessionTbody"></tbody>
+            </table>
+        </section>
+
+        <hr>
+
+        <section>
+            <h2>4. Comparație Teoretică</h2>
+            <table border="1" width="100%">
+                <thead>
+                    <tr>
+                        <th>Caracteristică</th>
+                        <th>Cookies</th>
+                        <th>Local Storage</th>
+                        <th>Session Storage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Capacitate</strong></td>
+                        <td>~4 KB per cookie</td>
+                        <td>~5 MB - 10 MB</td>
+                        <td>~5 MB</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Expirare</strong></td>
+                        <td>Setată manual (sau la închiderea sesiunii dacă lipsește)</td>
+                        <td>Niciodată (persistă până sunt șterse manual)</td>
+                        <td>La închiderea tab-ului / browser-ului</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Trimis la server?</strong></td>
+                        <td>Da, automat cu fiecare cerere HTTP</td>
+                        <td>Nu, stocare pur locală pe client</td>
+                        <td>Nu, stocare pur locală pe client</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Accesibil din?</strong></td>
+                        <td>Orice tab/fereastră (pe același domeniu)</td>
+                        <td>Orice tab/fereastră (pe același domeniu)</td>
+                        <td>Doar tab-ul curent în care s-a creat</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+    </div>
+
+    <script src="js/cookies.js"></script>
+    <script src="js/storage.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Aplicăm tema curentă
+            const currentTheme = CookieManager.get('theme') || 'light';
+            document.body.className = currentTheme;
+
+            // --- 1. POPULARE COOKIES ---
+            document.getElementById('rawCookies').textContent = document.cookie || 'Niciun cookie setat.';
+            const cookies = CookieManager.getAll();
+            const cookiesTbody = document.getElementById('cookiesTbody');
+            
+            if (Object.keys(cookies).length === 0) {
+                cookiesTbody.innerHTML = '<tr><td colspan="4">Nu există cookies.</td></tr>';
+            } else {
+                for (const [name, value] of Object.entries(cookies)) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${name}</td>
+                        <td style="word-break: break-all;">${value}</td>
+                        <td>${value.length}</td>
+                        <td><button class="btn-danger" data-type="cookie" data-key="${name}">Șterge</button></td>
+                    `;
+                    cookiesTbody.appendChild(tr);
+                }
+            }
+
+            // --- 2. POPULARE LOCAL STORAGE ---
+            const localData = StorageManager.getAllLocal();
+            document.getElementById('localJson').textContent = JSON.stringify(localData, null, 2);
+            const localTbody = document.getElementById('localTbody');
+
+            if (Object.keys(localData).length === 0) {
+                localTbody.innerHTML = '<tr><td colspan="4">Nu există date în Local Storage.</td></tr>';
+            } else {
+                for (const [key, value] of Object.entries(localData)) {
+                    const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${key}</td>
+                        <td style="word-break: break-all;">${stringValue}</td>
+                        <td>${stringValue.length}</td>
+                        <td><button class="btn-danger" data-type="local" data-key="${key}">Șterge</button></td>
+                    `;
+                    localTbody.appendChild(tr);
+                }
+            }
+
+            // --- 3. POPULARE SESSION STORAGE ---
+            const sessionData = StorageManager.getAllSession();
+            document.getElementById('sessionJson').textContent = JSON.stringify(sessionData, null, 2);
+            const sessionTbody = document.getElementById('sessionTbody');
+
+            if (Object.keys(sessionData).length === 0) {
+                sessionTbody.innerHTML = '<tr><td colspan="4">Nu există date în Session Storage.</td></tr>';
+            } else {
+                for (const [key, value] of Object.entries(sessionData)) {
+                    const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${key}</td>
+                        <td style="word-break: break-all;">${stringValue}</td>
+                        <td>${stringValue.length}</td>
+                        <td><button class="btn-danger" data-type="session" data-key="${key}">Șterge</button></td>
+                    `;
+                    sessionTbody.appendChild(tr);
+                }
+            }
+
+            // --- DELEGARE EVENIMENTE PENTRU BUTOANELE DE ȘTERGERE ---
+            // Adăugăm un singur event listener pe întregul document pentru a prinde click-urile pe butoanele generate dinamic
+            document.addEventListener('click', (e) => {
+                if (e.target && e.target.classList.contains('btn-danger')) {
+                    const type = e.target.getAttribute('data-type');
+                    const key = e.target.getAttribute('data-key');
+
+                    if (confirm(`Ești sigur că vrei să ștergi "${key}"?`)) {
+                        if (type === 'cookie') {
+                            CookieManager.delete(key);
+                        } else if (type === 'local') {
+                            StorageManager.removeLocal(key);
+                        } else if (type === 'session') {
+                            StorageManager.removeSession(key);
+                        }
+                        // Reîncărcăm pagina pentru a vedea tabelul actualizat
+                        window.location.reload();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

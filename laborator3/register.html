@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laborator 3 - Înregistrare</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light">
+
+    <nav>
+        <a href="index.html">Acasă</a> | 
+        <a href="preferences.html">Setări Preferințe</a> | 
+        <a href="cookies-info.html">Vizualizare Cookies</a> | 
+        <a href="login.html">Autentificare</a>
+    </nav>
+
+    <div class="container">
+        <h1>Înregistrare Cont Nou</h1>
+        
+        <div id="messageBox" style="display: none; margin-bottom: 15px; padding: 10px; border-radius: 5px; font-weight: bold;"></div>
+
+        <form id="registerForm">
+            <div>
+                <label for="regUsername">Nume utilizator (minim 3 caractere):</label><br>
+                <input type="text" id="regUsername" name="username" minlength="3" required>
+            </div>
+            <br>
+            
+            <div>
+                <label for="regEmail">Email:</label><br>
+                <input type="email" id="regEmail" name="email" required>
+            </div>
+            <br>
+            
+            <div>
+                <label for="regPassword">Parolă (minim 6 caractere):</label><br>
+                <input type="password" id="regPassword" name="password" minlength="6" required>
+            </div>
+            <br>
+            
+            <div>
+                <label for="confirmPassword">Confirmare parolă:</label><br>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            <br>
+            
+            <button type="submit">Înregistrează-te</button>
+        </form>
+
+        <p style="margin-top: 20px;">Ai deja cont? <a href="login.html">Autentifică-te aici</a>.</p>
+    </div>
+
+    <script src="js/cookies.js"></script>
+    <script src="js/storage.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Aplicăm tema curentă
+            const currentTheme = CookieManager.get('theme') || 'light';
+            document.body.className = currentTheme;
+
+            const registerForm = document.getElementById('registerForm');
+            const usernameInput = document.getElementById('regUsername');
+            const emailInput = document.getElementById('regEmail');
+            const passwordInput = document.getElementById('regPassword');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const messageBox = document.getElementById('messageBox');
+
+            // Funcție helper pentru afișarea mesajelor
+            function showMessage(text, isError = true) {
+                messageBox.textContent = text;
+                messageBox.style.display = 'block';
+                if (isError) {
+                    messageBox.style.backgroundColor = '#ffebee';
+                    messageBox.style.color = '#c62828';
+                    messageBox.style.border = '1px solid #ef9a9a';
+                } else {
+                    messageBox.style.backgroundColor = '#e8f5e9';
+                    messageBox.style.color = '#2e7d32';
+                    messageBox.style.border = '1px solid #a5d6a7';
+                }
+            }
+
+            // Logica la trimiterea formularului
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const username = usernameInput.value.trim();
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+
+                // 1. Validare: parolele trebuie să coincidă
+                if (password !== confirmPassword) {
+                    showMessage('Parolele nu coincid!');
+                    return;
+                }
+
+                // Extragem utilizatorii existenți (dacă nu există, creăm un array gol)
+                let users = StorageManager.getLocal('users') || [];
+
+                // 2. Validare: Username unic
+                const usernameExists = users.some(u => u.username.toLowerCase() === username.toLowerCase());
+                if (usernameExists) {
+                    showMessage('Acest nume de utilizator este deja folosit!');
+                    return;
+                }
+
+                // 3. Validare: Email unic
+                const emailExists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+                if (emailExists) {
+                    showMessage('Acest email este deja asociat unui cont!');
+                    return;
+                }
+
+                // 4. Salvare utilizator nou
+                // Generăm un ID nou 
+                const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+                
+                const newUser = {
+                    id: newId,
+                    username: username,
+                    email: email,
+                    password: password // Într-o aplicație reală, parola s-ar cripta, dar aici e doar un laborator de frontend
+                };
+
+                users.push(newUser);
+                StorageManager.setLocal('users', users);
+
+                // 5. Succes și Redirecționare
+                showMessage('Cont creat cu succes! Redirecționare către Autentificare...', false);
+                
+                // Dezactivăm butonul de submit pentru a preveni click-uri multiple
+                registerForm.querySelector('button[type="submit"]').disabled = true;
+
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>

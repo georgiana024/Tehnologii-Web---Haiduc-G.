@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laborator 3 - Setări Preferințe</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light">
+
+    <nav>
+        <a href="index.html">Acasă</a> | 
+        <a href="preferences.html">Setări Preferințe</a> | 
+        <a href="cookies-info.html">Vizualizare Cookies</a> | 
+        <a href="login.html">Autentificare</a>
+    </nav>
+
+    <div class="container">
+        <h1>Setări Preferințe</h1>
+        
+        <form id="preferencesForm">
+            <div>
+                <label for="usernameInput">Nume utilizator:</label><br>
+                <input type="text" id="usernameInput" name="username">
+            </div>
+            <br>
+            
+            <div>
+                <label for="themeSelect">Temă:</label><br>
+                <select id="themeSelect" name="theme">
+                    <option value="light">Luminos</option>
+                    <option value="dark">Întunecat</option>
+                </select>
+            </div>
+            <br>
+            
+            <div>
+                <label for="langSelect">Limbă:</label><br>
+                <select id="langSelect" name="language">
+                    <option value="ro">Română</option>
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                </select>
+            </div>
+            <br>
+            
+            <div>
+                <label for="fontSelect">Dimensiune font:</label><br>
+                <select id="fontSelect" name="fontSize">
+                    <option value="14">14px</option>
+                    <option value="16">16px</option>
+                    <option value="18">18px</option>
+                    <option value="20">20px</option>
+                </select>
+            </div>
+            <br>
+            
+            <button type="submit">Salvează Preferințele</button>
+        </form>
+
+        <div id="successMessage" class="alert-success" style="display: none; margin-top: 15px; color: green; font-weight: bold;">
+            Preferințele au fost salvate cu succes! Redirecționare...
+        </div>
+    </div>
+
+    <script src="js/cookies.js"></script>
+    <script src="js/storage.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const currentTheme = CookieManager.get('theme') || 'light';
+            document.body.className = currentTheme;
+
+            // Elementele formularului
+            const form = document.getElementById('preferencesForm');
+            const usernameInput = document.getElementById('usernameInput');
+            const themeSelect = document.getElementById('themeSelect');
+            const langSelect = document.getElementById('langSelect');
+            const fontSelect = document.getElementById('fontSelect');
+            const successMessage = document.getElementById('successMessage');
+
+            //  Pre-popularea formularelor cu valorile salvate
+            // Citim din cookies (Nume și Temă)
+            if (CookieManager.exists('username')) {
+                usernameInput.value = CookieManager.get('username');
+            }
+            themeSelect.value = currentTheme;
+
+            // Citim din localStorage (Limbă și Dimensiune font)
+            const savedLang = StorageManager.getLocal('language');
+            if (savedLang) {
+                langSelect.value = savedLang;
+            }
+
+            const savedFont = StorageManager.getLocal('fontSize');
+            if (savedFont) {
+                fontSelect.value = savedFont;
+            }
+
+            // Comportamentul la submit (trimiterea formularului)
+            form.addEventListener('submit', (event) => {
+                // Prevenim reîncărcarea default a paginii
+                event.preventDefault();
+
+                // Salvăm în Cookies (Nume și Temă)
+                CookieManager.set('username', usernameInput.value, 365);
+                CookieManager.set('theme', themeSelect.value, 365);
+
+                // Salvăm în localStorage (Limbă și Dimensiune font)
+                StorageManager.setLocal('language', langSelect.value);
+                StorageManager.setLocal('fontSize', fontSelect.value);
+
+                // Aplicăm tema imediat pentru a vedea efectul pe pagina curentă
+                document.body.className = themeSelect.value;
+
+                // Afișăm mesajul de succes
+                successMessage.style.display = 'block';
+
+                // Redirecționăm către index.html după 1.5 secunde
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>

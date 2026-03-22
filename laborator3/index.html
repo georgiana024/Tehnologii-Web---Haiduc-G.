@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laborator 3 - Pagina Principală</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light"> <nav>
+        <a href="index.html">Acasă</a> | 
+        <a href="preferences.html">Setări Preferințe</a> | 
+        <a href="cookies-info.html">Vizualizare Cookies</a> | 
+        <a href="login.html">Autentificare</a>
+    </nav>
+
+    <div class="container">
+        <h1>Bun venit, <span id="welcomeName">Vizitator</span>!</h1>
+        
+        <p>Aceasta este vizita ta cu numărul: <strong id="visitCount">1</strong> pe această pagină.</p>
+
+        <hr>
+
+        <h2>Cookies Active</h2>
+        <table border="1" width="100%">
+            <thead><tr><th>Nume</th><th>Valoare</th></tr></thead>
+            <tbody id="cookiesTableBody"></tbody>
+        </table>
+
+        <h2>Local Storage</h2>
+        <table border="1" width="100%">
+            <thead><tr><th>Cheie</th><th>Valoare</th></tr></thead>
+            <tbody id="localTableBody"></tbody>
+        </table>
+
+        <h2>Session Storage</h2>
+        <table border="1" width="100%">
+            <thead><tr><th>Cheie</th><th>Valoare</th></tr></thead>
+            <tbody id="sessionTableBody"></tbody>
+        </table>
+
+        <br>
+        <button id="clearAllBtn" class="btn-danger">Șterge Tot</button>
+    </div>
+
+    <script src="js/cookies.js"></script>
+    <script src="js/storage.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Logica pentru Temă  ---
+            const theme = CookieManager.get('theme') || 'light';
+            document.body.className = theme;
+
+            // --- Logica pentru Nume Utilizator ---
+            const username = CookieManager.get('username') || 'Vizitator';
+            document.getElementById('welcomeName').textContent = username;
+
+            // --- Logica pentru Vizite  ---
+            let visits = parseInt(CookieManager.get('visits') || '0');
+            visits += 1; // Incrementăm la fiecare încărcare
+            CookieManager.set('visits', visits, 365); // Salvăm noul număr
+            document.getElementById('visitCount').textContent = visits;
+
+            // --- Populare Tabele  ---
+            function renderTable(dataObj, tableBodyId) {
+                const tbody = document.getElementById(tableBodyId);
+                tbody.innerHTML = '';
+                
+                if (Object.keys(dataObj).length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="2">Nu există date.</td></tr>';
+                    return;
+                }
+
+                for (const [key, value] of Object.entries(dataObj)) {
+                    // Verificăm dacă valoarea este obiect (pentru storage) și o transformăm în string
+                    const displayValue = typeof value === 'object' ? JSON.stringify(value) : value;
+                    tbody.innerHTML += `<tr><td>${key}</td><td>${displayValue}</td></tr>`;
+                }
+            }
+
+            // Apelează funcțiile pentru a desena tabelele
+            renderTable(CookieManager.getAll(), 'cookiesTableBody');
+            renderTable(StorageManager.getAllLocal(), 'localTableBody');
+            renderTable(StorageManager.getAllSession(), 'sessionTableBody');
+
+            // --- Logica Butonului Șterge Tot  ---
+            document.getElementById('clearAllBtn').addEventListener('click', () => {
+                if(confirm('Ești sigur că vrei să ștergi toate datele?')) {
+                    CookieManager.deleteAll();
+                    StorageManager.clearLocal();
+                    StorageManager.clearSession();
+                    alert('Toate datele au fost șterse!');
+                    window.location.reload(); 
+                }
+            });
+        });
+    </script>
+</body>
+</html>

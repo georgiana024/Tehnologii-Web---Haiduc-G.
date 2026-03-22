@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laborator 3 - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light">
+
+    <nav>
+        <a href="index.html">Acasă</a> | 
+        <a href="preferences.html">Setări Preferințe</a> | 
+        <a href="cookies-info.html">Vizualizare Cookies</a> | 
+        <a href="dashboard.html">Dashboard</a> | 
+        <a href="cart.html">Coș de Cumpărături</a>
+    </nav>
+
+    <div class="container">
+        <h1>Dashboard Utilizator</h1>
+        
+        <p>Bun venit în zona securizată, <strong id="dashUsername" style="color: #2196F3;"></strong>!</p>
+
+        <section style="background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #333;">
+            <h3 style="margin-top: 0;">Informații Sesiune Curentă</h3>
+            <ul>
+                <li><strong>ID Sesiune:</strong> <span id="sessId"></span></li>
+                <li><strong>Username:</strong> <span id="sessUser"></span></li>
+                <li><strong>Email:</strong> <span id="sessEmail"></span></li>
+                <li><strong>Ora autentificării:</strong> <span id="sessTime"></span></li>
+                <li><strong>Durata sesiunii:</strong> <span id="sessionDuration" style="font-weight: bold; color: #d32f2f;">0s</span></li>
+            </ul>
+        </section>
+
+        <section style="margin-bottom: 20px;">
+            <h3>Date brute din sessionStorage (Debug)</h3>
+            <pre id="rawSessionData" style="background: #e0e0e0; padding: 10px; border-radius: 5px; overflow-x: auto; color: #333;"></pre>
+        </section>
+
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button id="logoutBtn" class="btn-danger">Deconectare</button>
+            <a href="cart.html" style="text-decoration: none;">
+                <button style="background-color: #4CAF50;">Mergi la Coșul de Cumpărături</button>
+            </a>
+            
+            <a href="dashboard.html" target="_blank" style="margin-left: auto; text-decoration: none; font-size: 0.9em;">
+                🧪 Deschide într-un tab nou (Experiment)
+            </a>
+        </div>
+    </div>
+
+    <script src="js/cookies.js"></script>
+    <script src="js/storage.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Aplicăm tema curentă
+            const currentTheme = CookieManager.get('theme') || 'light';
+            document.body.className = currentTheme;
+
+            //  Verificare Autentificare
+            const currentSession = StorageManager.getSession('currentSession');
+            
+            if (!currentSession) {
+                // Dacă nu avem sesiune, redirecționăm imediat la login
+                alert('Acces interzis! Trebuie să te autentifici mai întâi.');
+                window.location.href = 'login.html';
+                return; // Oprim execuția restului de cod
+            }
+
+            // Populăm datele în interfață
+            document.getElementById('dashUsername').textContent = currentSession.username;
+            document.getElementById('sessId').textContent = currentSession.sessionId;
+            document.getElementById('sessUser').textContent = currentSession.username;
+            document.getElementById('sessEmail').textContent = currentSession.email;
+            
+            // Formatăm data de logare pentru a fi mai ușor de citit
+            const loginDate = new Date(currentSession.loginTime);
+            document.getElementById('sessTime').textContent = loginDate.toLocaleString('ro-RO');
+
+            // Afișăm JSON-ul brut pentru debug
+            const allSessionData = StorageManager.getAllSession();
+            document.getElementById('rawSessionData').textContent = JSON.stringify(allSessionData, null, 2);
+
+            // Logica pentru Timer-ul Duratei Sesiunii (Actualizat la fiecare secundă)
+            const durationSpan = document.getElementById('sessionDuration');
+            
+            function updateSessionDuration() {
+                const now = new Date();
+                const diffMs = now - loginDate; // Diferența în milisecunde
+                
+                const diffSecs = Math.floor(diffMs / 1000);
+                const minutes = Math.floor(diffSecs / 60);
+                const seconds = diffSecs % 60;
+                const hours = Math.floor(minutes / 60);
+                
+                let timeString = '';
+                if (hours > 0) timeString += `${hours}h `;
+                if (minutes > 0 || hours > 0) timeString += `${minutes % 60}m `;
+                timeString += `${seconds}s`;
+
+                durationSpan.textContent = timeString;
+            }
+
+            updateSessionDuration();s
+            setInterval(updateSessionDuration, 1000);
+
+            // Logica Butonului de Deconectare
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                if(confirm('Ești sigur că vrei să te deconectezi?')) {
+                    StorageManager.removeSession('currentSession');
+                    StorageManager.removeSession('cart');
+                    
+                    alert('Te-ai deconectat cu succes.');
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

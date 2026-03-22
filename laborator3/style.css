@@ -1,0 +1,203 @@
+/* =========================================
+   1. Stiluri de bază
+   ========================================= */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s, color 0.3s; 
+}
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Meniu de navigare */
+nav {
+    background-color: #333;
+    padding: 15px;
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 0 15px;
+}
+
+nav a:hover {
+    color: #4CAF50;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #ddd;
+    margin: 20px 0;
+}
+
+/* =========================================
+   2. Stiluri pentru formulare
+   ========================================= */
+form div {
+    margin-bottom: 10px;
+}
+
+
+label {
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+select {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+
+button {
+    padding: 10px 20px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+button:hover {
+    background-color: #0b7dda;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+/* =========================================
+   3. Stiluri pentru tabele
+   ========================================= */
+table {
+    width: 100%;
+    border-collapse: collapse; 
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+/* Header colorat */
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* Hover pe rânduri */
+tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* =========================================
+   4. Două teme (Luminos și Întunecat)
+   ========================================= */
+/* Tema luminoasă (.light) este implicită din setările de bază de mai sus */
+body.light {
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+body.light .container {
+    background-color: #ffffff;
+}
+
+/* Tema întunecată (.dark) - suprascrie culorile */
+body.dark {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+body.dark .container {
+    background-color: #1e1e1e;
+    box-shadow: 0 4px 6px rgba(255,255,255,0.05);
+}
+
+body.dark table th, 
+body.dark table td {
+    border-color: #444;
+}
+
+body.dark table th {
+    background-color: #333;
+    color: #fff;
+}
+
+body.dark table tr:hover {
+    background-color: #2a2a2a;
+}
+
+body.dark input, 
+body.dark select {
+    background-color: #333;
+    color: #fff;
+    border-color: #555;
+}
+
+body.dark hr {
+    background-color: #444;
+}
+
+body.dark a {
+    color: #64b5f6;
+}
+
+/* =========================================
+   5. Clase utilitare
+   ========================================= */
+/* .alert-success - verde */
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+}
+
+/* .alert-error - roșu */
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+}
+
+/* .btn-danger - roșu pentru butoane de ștergere */
+.btn-danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+}

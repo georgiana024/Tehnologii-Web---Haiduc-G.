@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laborator 3 - Autentificare</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light">
+
+    <nav>
+        <a href="index.html">Acasă</a> | 
+        <a href="preferences.html">Setări Preferințe</a> | 
+        <a href="cookies-info.html">Vizualizare Cookies</a> | 
+        <a href="login.html">Autentificare</a>
+    </nav>
+
+    <div class="container">
+        <h1>Autentificare</h1>
+        
+        <div id="errorMessage" class="alert-error" style="display: none; color: red; margin-bottom: 15px; font-weight: bold;"></div>
+
+        <form id="loginForm">
+            <div>
+                <label for="username">Nume utilizator:</label><br>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <br>
+            
+            <div>
+                <label for="password">Parolă:</label><br>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <br>
+            
+            <div>
+                <input type="checkbox" id="rememberMe" name="rememberMe">
+                <label for="rememberMe">Ține-mă minte</label>
+            </div>
+            <br>
+            
+            <button type="submit">Autentificare</button>
+        </form>
+
+        <p style="margin-top: 20px;">Nu ai cont? <a href="register.html">Înregistrează-te aici</a>.</p>
+    </div>
+
+    <script src="js/cookies.js"></script>
+    <script src="js/storage.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Aplicăm tema curentă
+            const currentTheme = CookieManager.get('theme') || 'light';
+            document.body.className = currentTheme;
+
+            //  Crearea utilizatorilor de test la prima încărcare
+            let users = StorageManager.getLocal('users');
+            if (!users) {
+                const defaultUsers = [
+                    { id: 1, username: 'admin', password: 'password', email: 'admin@example.com' },
+                    { id: 2, username: 'student', password: 'student123', email: 'student@example.com' }
+                ];
+                StorageManager.setLocal('users', defaultUsers);
+                users = defaultUsers;
+                console.log('Utilizatorii de test au fost creați.');
+            }
+
+            const loginForm = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const rememberMeCheckbox = document.getElementById('rememberMe');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Pre-populare username dacă a fost bifat "Ține-mă minte" anterior
+            const savedUsername = StorageManager.getLocal('rememberedUser');
+            if (savedUsername) {
+                usernameInput.value = savedUsername;
+                rememberMeCheckbox.checked = true;
+            }
+
+            // Logica de autentificare la trimiterea formularului
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault(); // Prevenim reîncărcarea paginii
+
+                const inputUsername = usernameInput.value.trim();
+                const inputPassword = passwordInput.value;
+
+                // Căutăm utilizatorul în lista din localStorage
+                const user = users.find(u => u.username === inputUsername && u.password === inputPassword);
+
+                if (user) {
+                    // Ascundem eroarea dacă exista
+                    errorMessage.style.display = 'none';
+
+                    // Gestionăm opțiunea "Ține-mă minte"
+                    if (rememberMeCheckbox.checked) {
+                        StorageManager.setLocal('rememberedUser', user.username);
+                    } else {
+                        StorageManager.removeLocal('rememberedUser');
+                    }
+
+                    // Creăm sesiunea în sessionStorage
+                    const sessionData = {
+                        userId: user.id,
+                        username: user.username,
+                        email: user.email,
+                        loginTime: new Date().toISOString(),
+                        sessionId: 'sess_' + Math.random().toString(36).substr(2, 9) // Generare ID random
+                    };
+                    
+                    StorageManager.setSession('currentSession', sessionData);
+
+                    // Redirecționăm către dashboard
+                    window.location.href = 'dashboard.html';
+                } else {
+                    // Afișăm mesaj de eroare
+                    errorMessage.textContent = 'Nume de utilizator sau parolă incorecte!';
+                    errorMessage.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
